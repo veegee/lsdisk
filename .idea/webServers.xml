@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="22ce5fe2-a1f9-480c-b686-dffaaed235b4" name="vserver.local" url="http://vserver.local">
+        <fileTransfer host="vserver.local" port="22" privateKey="$USER_HOME$/.ssh/id_rsa" rootFolder="/home/veegee" accessType="SFTP" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

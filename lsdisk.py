@@ -1,7 +1,10 @@
-import subprocess
-import shlex
 import json
+import os
+import shlex
+import subprocess
+import sys
 from functools import total_ordering
+
 import tabulate
 
 
@@ -24,15 +27,34 @@ class Device:
 
     @property
     def _display_fields(self):
-        return [self.path, self.wwn_path, self.model, self.size]
+        return [self.path, self.wwn_path, self.model, self.size, self.associated_array_fstype, self.associated_array_label]
+
+    @property
+    def _children(self):
+        try:
+            return self._data['children']
+        except KeyError:
+            return []
+
+    @property
+    def children(self):
+        return [Device(x) for x in self._children]
 
     @property
     def device_type(self):
         return self._data['type']
 
     @property
+    def fstype(self):
+        return self._data['fstype']
+
+    @property
     def hctl(self):
         return self._data['hctl']
+
+    @property
+    def label(self):
+        return self._data['label']
 
     @property
     def model(self):
@@ -73,22 +95,41 @@ class Device:
         elif self.tran == 'nvme':
             return f'/dev/disk/by-id/nvme-{self.wwn}'
 
+    @property
+    def associated_array_fstype(self):
+        for s in map(lambda d: d.fstype if '_member' in d.fstype else None, self.children):
+            if s:
+                return s
+
+    @property
+    def associated_array_label(self):
+        for label in map(lambda d: d.label if '_member' in d.fstype else None, self.children):
+            if label:
+                return label
+
 
 def get_zpool_devices():
     p = subprocess.Popen(shlex.split('zpool status'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     assert p.returncode == 0
-    s = out.decode().strip()
+    s = out.decode().strip().split('\n')
+
+    # parse
 
 
 def main():
-    p = subprocess.Popen(shlex.split('lsblk -O -d -J'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(shlex.split('lsblk -O -J'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     assert p.returncode == 0
     s = out.decode().strip()
     obj = json.loads(s)['blockdevices']
     devices = sorted([Device(x) for x in obj])
-    print(tabulate.tabulate(devices, tablefmt='plain'))
+
+    if os.isatty(sys.stdout.fileno()):
+        tablefmt = 'psql'
+    else:
+        tablefmt = 'plain'
+    print(tabulate.tabulate(devices, tablefmt=tablefmt))
 
 
 if __name__ == '__main__':

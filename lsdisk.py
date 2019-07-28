@@ -27,7 +27,7 @@ class Device:
 
     @property
     def _display_fields(self):
-        return [self.path, self.wwn_path, self.model, self.size, self.associated_array_fstype, self.associated_array_label]
+        return [self.path, self.wwn_path, self.model, self.size, self.ss, self.associated_array_fstype, self.associated_array_label]
 
     @property
     def _children(self):
@@ -75,6 +75,18 @@ class Device:
     @property
     def size(self):
         return self._data['size']
+
+    @property
+    def sl(self):
+        return self._data['log-sec']
+    
+    @property
+    def sp(self):
+        return self._data['phy-sec']
+    
+    @property
+    def ss(self):
+        return '{}/{}'.format(self.sl, self.sp)
 
     @property
     def tran(self):

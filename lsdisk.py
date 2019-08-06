@@ -109,12 +109,18 @@ class Device:
 
     @property
     def associated_array_fstype(self):
+        if self.fstype:
+            return self.fstype
+
         for s in map(lambda d: d.fstype if '_member' in d.fstype else None, self.children):
             if s:
                 return s
 
     @property
     def associated_array_label(self):
+        if self.label:
+            return self.label
+
         for label in map(lambda d: d.label if '_member' in d.fstype else None, self.children):
             if label:
                 return label

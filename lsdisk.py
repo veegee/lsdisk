@@ -46,7 +46,7 @@ class Device:
 
     @property
     def fstype(self):
-        return self._data['fstype']
+        return self._data['fstype'] or ''
 
     @property
     def hctl(self):

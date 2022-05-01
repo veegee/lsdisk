@@ -5,7 +5,10 @@ import subprocess
 import sys
 from functools import total_ordering
 
+import pint
 import tabulate
+
+ureg = pint.UnitRegistry()
 
 
 @total_ordering
@@ -27,7 +30,8 @@ class Device:
 
     @property
     def _display_fields(self):
-        return [self.path, self.wwn_path, self.model, self.size, self.ss, self.associated_array_fstype, self.associated_array_label]
+        return [self.path, self.wwn_path, self.model, self.size, self.ss, self.associated_array_fstype,
+                self.associated_array_label]
 
     @property
     def _children(self):
@@ -74,16 +78,17 @@ class Device:
 
     @property
     def size(self):
-        return self._data['size']
+        q = ureg.Quantity(self._data['size'], 'byte')
+        return f'{q.to("gigabyte"):~.0fP}'
 
     @property
     def sl(self):
         return self._data['log-sec']
-    
+
     @property
     def sp(self):
         return self._data['phy-sec']
-    
+
     @property
     def ss(self):
         return '{}/{}'.format(self.sl, self.sp)
@@ -136,12 +141,14 @@ def get_zpool_devices():
 
 
 def main():
-    p = subprocess.Popen(shlex.split('lsblk -O -J'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(shlex.split('lsblk -O -J --bytes'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     assert p.returncode == 0
     s = out.decode().strip()
     obj = json.loads(s)['blockdevices']
-    devices = sorted([Device(x) for x in obj])
+    devices = (Device(x) for x in obj)
+    devices = filter(lambda d: d.device_type != 'loop', devices)
+    devices = sorted(devices)
 
     if os.isatty(sys.stdout.fileno()):
         tablefmt = 'psql'

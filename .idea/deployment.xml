@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="vserver.local">
+  <component name="PublishConfigData" autoUpload="Always" serverName="veegee@vserver.local:22">
     <serverData>
-      <paths name="vserver.local">
+      <paths name="veegee@vserver.local:22">
         <serverdata>
           <mappings>
-            <mapping deploy="/projects/python/lsdisk" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/tmp/pycharm_project_956" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
